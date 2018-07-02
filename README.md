@@ -36,3 +36,27 @@ The UNIX Epoch time pattern-match is unsophisticated:
   - which does not have commas (e.g. it would _not_ match "1,530,473,256.4")
   - which has a decimal point followed by at least one number (e.g. it would
     _not_ match "1530473256", but it would match "1530473256.4")
+
+On Linux, you can use environment variable `TZ` to set the output timezone.
+For example, say the server's time is set to UTC (a common practice), but you'd
+prefer to see the output in Toronto time ([complete list of `TZ`
+values](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)), you'd
+set the `TZ` variable as in the following example:
+
+```bash
+TZ=America/Toronto ./u2date < /var/vcap/sys/log/atc/atc.stdout.log | less
+```
+
+## TODO
+
+We'd like to have tests and CI as well.
+
+We'd like to be able to parse nanosecond output (i.e. the number of nanoseconds
+elapsed since January 1, 1970 UTC, e.g. the output from Golang's
+[`time.UnixNano()](https://golang.org/pkg/time/#Time.UnixNano)
+"1530473256452262878")
+
+We'd like to remove the decimal-point requirement (so that "1530473256" would
+match properly).
+
+We'd like to narrow the matching window (a 32-year span is rather broad).
