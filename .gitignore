@@ -12,3 +12,5 @@
 *.out
 # No JetBrains configurations
 .idea/
+# No main. Artifact of `go build u2date/main.go`
+main
