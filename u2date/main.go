@@ -1,13 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
-	"bufio"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
-	"strconv"
 )
 
 func main() {
