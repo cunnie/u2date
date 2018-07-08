@@ -45,11 +45,20 @@ var _ = Describe("U2date", func() {
 	})
 
 	Describe("When passed a file with no carriage return on the last line", func() {
-		It("appends a carriage return (this is a mostly-harmless but)", func() {
+		It("appends a carriage return (this is a mostly-harmless bug)", func() {
 			go writeToStdin(stdin, "a")
 			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Ω(err).ShouldNot(HaveOccurred())
 			Ω(session.Wait().Out.Contents()).Should(Equal([]uint8("a\n")))
+		})
+	})
+
+	Describe("When passed a file with a convertible time", func() {
+		It("converts it & appends a carriage return (this is a mostly-harmless bug)", func() {
+			go writeToStdin(stdin, "1500000000.0\n")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Ω(err).ShouldNot(HaveOccurred())
+			Ω(session.Wait().Out.Contents()).Should(Equal([]uint8("2017-07-13 19:40:00 -0700 PDT\n")))
 		})
 	})
 
