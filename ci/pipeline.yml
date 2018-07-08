@@ -1,0 +1,31 @@
+# fly -t nono sp -c pipeline.yml -p u2date
+# fly -t nono unpause-pipeline -p u2date
+# fly -t nono expose-pipeline -p u2date
+---
+groups:
+- name: u2date
+  jobs:
+  - integration
+
+jobs:
+- name: integration
+  plan:
+  - get: u2date
+    trigger: true
+  - task: integration-tests
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: blabbertabber/golang-ginko
+      inputs:
+      - name: u2date
+      run:
+        path: u2date/ci/tasks/test-unit.sh
+
+resources:
+- name: u2date
+  type: git
+  source:
+    uri: https://github.com/cunnie/u2date

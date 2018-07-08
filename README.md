@@ -1,10 +1,10 @@
-# u2date
+## u2date [![u2date](https://ci.nono.io/api/v1/pipelines/u2date/jobs/integration/badge)](https://ci.nono.io/?groups=u2date)
 
 `u2date` is a command-line filter which converts [UNIX Epoch
 time](https://en.wikipedia.org/wiki/Unix_time) (e.g. `1530473256.452262878`) to
 human-readable time (e.g. `2018-07-01 12:27:36.452262878 -0700 PDT`).
 
-## Linux Quick Start
+### Linux Quick Start
 
 ```shell
 curl -o u2date -L https://github.com/cunnie/u2date/releases/download/1.0.0/u2date-linux-amd64
@@ -26,7 +26,7 @@ sample output (notice the timestamps are human-readable):
 {"timestamp":"2018-07-01 12:27:42.311525583 -0700 PDT","source":"atc","message":"atc.listening","log_level":1,"data":{"debug":"127.0.0.1:8079","http":"0.0.0.0:8080","https":"0.0.0.0:443"}}
 ```
 
-## Technical Notes
+### Technical Notes
 
 The UNIX Epoch time pattern-match is unsophisticated:
 
@@ -47,9 +47,7 @@ set the `TZ` variable as in the following example:
 TZ=America/Toronto ./u2date < /var/vcap/sys/log/atc/atc.stdout.log | less
 ```
 
-## TODO
-
-We'd like to have tests and CI as well.
+### TODO
 
 We'd like to be able to parse nanosecond output (i.e. the number of nanoseconds
 elapsed since January 1, 1970 UTC, e.g. the output from Golang's
