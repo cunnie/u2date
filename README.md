@@ -49,4 +49,4 @@ The UNIX Epoch time pattern-match is unsophisticated:
 
 ### Developer Notes
 
-Developer notes can be found [here](developer.md).
+Developer notes can be found [here](docs/DEVELOPER.md).
