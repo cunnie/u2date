@@ -81,6 +81,15 @@ var _ = Describe("U2date", func() {
 		})
 	})
 
+	Describe("When passed a file containing a timestamp that's ten billion or greater", func() {
+		It("doesn't converts it", func() {
+			go writeToStdin(stdin, "11500000000.0\n")
+			session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+			Ω(err).ShouldNot(HaveOccurred())
+			Ω(session.Wait().Out.Contents()).Should(Equal([]uint8("11500000000.0\n")))
+		})
+	})
+
 	Describe("When passed a file containing a timestamp that's just shy of 2 billion", func() {
 		It("converts it", func() {
 			go writeToStdin(stdin, "1999999999.9")
@@ -118,7 +127,6 @@ var _ = Describe("U2date", func() {
 			Ω(session.Wait().Out.Contents()).Should(Equal([]uint8("2017-07-13 19:40:00 -0700 PDT 1500000000. 1500000000\n")))
 		})
 	})
-
 
 	AfterSuite(func() {
 		gexec.CleanupBuildArtifacts()
