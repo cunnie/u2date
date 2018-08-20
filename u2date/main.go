@@ -13,10 +13,12 @@ import (
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 
-	reTime := regexp.MustCompile(`([^0-9]|^)1[0-9]{9}\.[0-9]+`) // Seconds since the Epoch, includes subseconds
+	reTimeSeconds := regexp.MustCompile(`([^0-9]|^)1[0-9]{9}\.[0-9]+`)        // Seconds since the Epoch, includes subseconds
+	reTimeNanoseconds := regexp.MustCompile(`([^0-9]|^)1[0-9]{18}([^0-9]|$)`) // Seconds since the Epoch, includes subseconds
 
 	for scanner.Scan() {
-		s := reTime.ReplaceAllStringFunc(scanner.Text(), toTime)
+		s := reTimeSeconds.ReplaceAllStringFunc(scanner.Text(), secondsToTime)
+		s = reTimeNanoseconds.ReplaceAllStringFunc(s, nanosecondsToTime)
 		fmt.Println(s) // Println will add back the final '\n'
 	}
 	if err := scanner.Err(); err != nil {
@@ -24,18 +26,39 @@ func main() {
 	}
 }
 
-func toTime(s string) string {
+func secondsToTime(s string) string {
 	prefix := ""
-	ses := strings.Split(s, ".")
-	if ses[0][0] != uint8('1') {
-		prefix = string(ses[0][0])
-		ses[0] = ses[0][1:]
+	if s[0] != uint8('1') {
+		prefix = string(s[0])
+		s = s[1:]
 	}
+	ses := strings.Split(s, ".")
 	seconds, err := strconv.ParseInt(ses[0], 10, 64)
 	check(err)
 	nanoseconds, err := strconv.ParseInt((ses[1] + "000000000")[:9], 10, 64)
 	check(err)
 	return prefix + time.Unix(seconds, nanoseconds).String()
+}
+
+// static variable, declaring at global scope seems like the least evail
+// https://stackoverflow.com/questions/30558071/static-local-variable-in-go
+var reDigits = regexp.MustCompile(`\d`)
+
+func nanosecondsToTime(s string) string {
+	prefix := ""
+	suffix := ""
+	if s[0] != uint8('1') {
+		prefix = string(s[0])
+		s = s[1:]
+	}
+	a := reDigits.Find([]uint8(string(s[len(s)-1])))
+	if a == nil {
+		suffix = string(s[len(s)-1])
+		s = s[:len(s)-1]
+	}
+	nanoseconds, err := strconv.ParseInt(s, 10, 64)
+	check(err)
+	return prefix + time.Unix(0, nanoseconds).String() + suffix
 }
 
 func check(err error) {

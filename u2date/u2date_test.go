@@ -75,6 +75,15 @@ var _ = Describe("U2date", func() {
 			})
 		})
 
+		Describe("When passed a file containing a recognizable timestamp", func() {
+			It("converts it while not affecting leading or trailing characters", func() {
+				go writeToStdin(stdin, "->1500000000.0<-\n")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(string(session.Wait().Out.Contents())).Should(Equal("->2017-07-13 19:40:00 -0700 PDT<-\n"))
+			})
+		})
+
 		Describe("When passed a file containing a timestamp that's 2 billion or greater", func() {
 			It("doesn't convert it", func() {
 				go writeToStdin(stdin, "2000000000.0")
@@ -85,7 +94,7 @@ var _ = Describe("U2date", func() {
 		})
 
 		Describe("When passed a file containing a recognizable timestamp buried in a larger number", func() {
-			FIt("doesn't convert it", func() {
+			It("doesn't convert it", func() {
 				go writeToStdin(stdin, "12345678901500000000.0\n")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Ω(err).ShouldNot(HaveOccurred())
@@ -144,6 +153,65 @@ var _ = Describe("U2date", func() {
 				Ω(err).ShouldNot(HaveOccurred())
 				// known bug: u2date will insert a "\n" when the timestamp is the very last
 				Ω(string(session.Wait().Out.Contents())).Should(Equal("2017-07-13 19:40:00 -0700 PDT 1500000000. 1500000000\n"))
+			})
+		})
+	})
+
+	Context("When it recognizes nanoseconds since the epoch", func() {
+		Describe("When passed a file containing a recognizable timestamp", func() {
+			It("converts it", func() {
+				go writeToStdin(stdin, "1500000000000000000\n")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(string(session.Wait().Out.Contents())).Should(Equal("2017-07-13 19:40:00 -0700 PDT\n"))
+			})
+		})
+
+		Describe("When passed a file containing a timestamp that's 2 quadrillion or greater", func() {
+			It("doesn't convert it", func() {
+				go writeToStdin(stdin, "2000000000000000000")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(string(session.Wait().Out.Contents())).Should(Equal("2000000000000000000\n"))
+			})
+		})
+
+		Describe("When passed a file containing a timestamp that's just shy of 2 quadrillion", func() {
+			It("converts it", func() {
+				go writeToStdin(stdin, "1999999999999999999")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(string(session.Wait().Out.Contents())).Should(Equal("2033-05-17 20:33:19.999999999 -0700 PDT\n"))
+			})
+		})
+
+		Describe("When passed a file containing a timestamp that's 1 quadrillion", func() {
+			It("doesn't convert it", func() {
+				go writeToStdin(stdin, "1000000000000000000")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(string(session.Wait().Out.Contents())).Should(Equal("2001-09-08 18:46:40 -0700 PDT\n"))
+			})
+		})
+
+		Describe("When passed a file containing a timestamp that's just shy of 1 quadrillion", func() {
+			It("doesn't convert it", func() {
+				go writeToStdin(stdin, "999999999999999")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Ω(err).ShouldNot(HaveOccurred())
+				// known bug: u2date will insert a "\n" when the timestamp is the very last
+				Ω(string(session.Wait().Out.Contents())).Should(Equal("999999999999999\n"))
+			})
+		})
+
+		Describe("When passed a file containing a timestamp that doesn't have a decimal point", func() {
+			It("doesn't convert it", func() {
+				// go writeToStdin(stdin, "150000000000000000.0 1500000000000000000. 1500000000000000000")
+				go writeToStdin(stdin, "1500000000000000000.0 1500000000000000000. 1500000000000000000")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Ω(err).ShouldNot(HaveOccurred())
+				// known bug: u2date will insert a "\n" when the timestamp is the very last
+				Ω(string(session.Wait().Out.Contents())).Should(Equal("2017-07-13 19:40:00 -0700 PDT.0 2017-07-13 19:40:00 -0700 PDT. 2017-07-13 19:40:00 -0700 PDT\n"))
 			})
 		})
 	})
