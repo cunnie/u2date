@@ -93,15 +93,6 @@ var _ = Describe("U2date", func() {
 			})
 		})
 
-		Describe("When passed a file containing a recognizable timestamp buried in a larger number", func() {
-			It("doesn't convert it", func() {
-				go writeToStdin(stdin, "12345678901500000000.0\n")
-				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-				Ω(err).ShouldNot(HaveOccurred())
-				Ω(string(session.Wait().Out.Contents())).Should(Equal("12345678901500000000.0\n"))
-			})
-		})
-
 		Describe("When passed a file containing a recognizable timestamp", func() {
 			It("converts it while not affecting leading or trailing characters", func() {
 				go writeToStdin(stdin, "->1500000000.0<-\n")
@@ -111,7 +102,7 @@ var _ = Describe("U2date", func() {
 			})
 		})
 		Describe("When passed a file containing a timestamp that's ten billion or greater", func() {
-			It("doesn't converts it", func() {
+			It("doesn't convert it", func() {
 				go writeToStdin(stdin, "11500000000.0\n")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Ω(err).ShouldNot(HaveOccurred())
@@ -204,8 +195,8 @@ var _ = Describe("U2date", func() {
 			})
 		})
 
-		Describe("When passed a file containing a timestamp that doesn't have a decimal point", func() {
-			It("doesn't convert it", func() {
+		Describe("When passed a file containing a timestamp that's greater than 1 quadrillion and has decimal points", func() {
+			It("converts it and leaves the decimal points unmolested", func() {
 				// go writeToStdin(stdin, "150000000000000000.0 1500000000000000000. 1500000000000000000")
 				go writeToStdin(stdin, "1500000000000000000.0 1500000000000000000. 1500000000000000000")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
