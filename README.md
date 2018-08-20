@@ -1,8 +1,9 @@
 ## u2date [![u2date](https://ci.nono.io/api/v1/pipelines/u2date/jobs/integration/badge)](https://ci.nono.io/teams/main/pipelines/u2date)
 
 `u2date` is a command-line filter which converts [UNIX Epoch
-time](https://en.wikipedia.org/wiki/Unix_time) (e.g. `1530473256.452262878`) to
-human-readable time (e.g. `2018-07-01 12:27:36.452262878 -0700 PDT`).
+time](https://en.wikipedia.org/wiki/Unix_time) (e.g. `1530473256.452262878`
+(seconds) or `1530473256452262878` (nanoseconds)) to human-readable time (e.g.
+`2018-07-01 12:27:36.452262878 -0700 PDT`).
 
 ### Linux Quick Start
 
@@ -40,12 +41,17 @@ TZ=America/Toronto ./u2date < /var/vcap/sys/log/atc/atc.stdout.log | less
 
 The UNIX Epoch time pattern-match is unsophisticated:
 
-- It searches for a number between 1 billion and 2 billion seconds (which is an
+- When searching for timestamps in seconds, it looks for a number between 1
+  billion and 2 billion seconds (which is an
   overly-broad search spanning from Sunday, September 9, 2001 01:46:40 UTC to
   Wednesday, May 18, 2033 03:33:20 UTC)
   - which does not have commas (e.g. it would _not_ match "1,530,473,256.4")
   - which has a decimal point followed by at least one number (e.g. it would
     _not_ match "1530473256", but it would match "1530473256.4")
+- Similarly for the nanosecond timestamps, it searches for a number between 1
+  quadrillion and 2 quadrillion
+  - unlike the seconds-based timestamp search, the nanosecond search does _not_ look for
+    a decimal point
 
 ### Developer Notes
 
