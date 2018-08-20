@@ -13,8 +13,8 @@ import (
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 
-	reTimeSeconds := regexp.MustCompile(`([^0-9]|^)1[0-9]{9}\.[0-9]+`)        // Seconds since the Epoch, includes subseconds
-	reTimeNanoseconds := regexp.MustCompile(`([^0-9]|^)1[0-9]{18}([^0-9]|$)`) // Seconds since the Epoch, includes subseconds
+	reTimeSeconds := regexp.MustCompile(`([^\d]|^)1\d{9}\.\d+`)          // Seconds since the Epoch, includes subseconds
+	reTimeNanoseconds := regexp.MustCompile(`([^\d]|^)1\d{18}([^\d]|$)`) // Seconds since the Epoch, includes subseconds
 
 	for scanner.Scan() {
 		s := reTimeSeconds.ReplaceAllStringFunc(scanner.Text(), secondsToTime)
