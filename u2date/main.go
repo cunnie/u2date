@@ -25,12 +25,17 @@ func main() {
 }
 
 func toTime(s string) string {
+	prefix := ""
 	ses := strings.Split(s, ".")
+	if ses[0][0] != uint8('1') {
+		prefix = string(ses[0][0])
+		ses[0] = ses[0][1:]
+	}
 	seconds, err := strconv.ParseInt(ses[0], 10, 64)
 	check(err)
 	nanoseconds, err := strconv.ParseInt((ses[1] + "000000000")[:9], 10, 64)
 	check(err)
-	return time.Unix(seconds, nanoseconds).String()
+	return prefix + time.Unix(seconds, nanoseconds).String()
 }
 
 func check(err error) {

@@ -84,6 +84,23 @@ var _ = Describe("U2date", func() {
 			})
 		})
 
+		Describe("When passed a file containing a recognizable timestamp buried in a larger number", func() {
+			FIt("doesn't convert it", func() {
+				go writeToStdin(stdin, "12345678901500000000.0\n")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(string(session.Wait().Out.Contents())).Should(Equal("12345678901500000000.0\n"))
+			})
+		})
+
+		Describe("When passed a file containing a recognizable timestamp", func() {
+			It("converts it while not affecting leading or trailing characters", func() {
+				go writeToStdin(stdin, "->1500000000.0<-\n")
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(string(session.Wait().Out.Contents())).Should(Equal("->2017-07-13 19:40:00 -0700 PDT<-\n"))
+			})
+		})
 		Describe("When passed a file containing a timestamp that's ten billion or greater", func() {
 			It("doesn't converts it", func() {
 				go writeToStdin(stdin, "11500000000.0\n")
