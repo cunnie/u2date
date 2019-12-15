@@ -11,11 +11,12 @@ import (
 	"runtime"
 )
 
-var _ = Describe("U2date", func() {
+var _ = Describe("u2date", func() {
 	var pathToU2datetCLI string
 	var stdin io.WriteCloser
 	var err error
 	var cmd *exec.Cmd
+	var args []string
 
 	if runtime.GOOS == "windows" {
 		panic("Tests won't work under Windows; they depend on the TZ environment variable")
@@ -27,8 +28,8 @@ var _ = Describe("U2date", func() {
 		Ω(err).ShouldNot(HaveOccurred())
 	})
 
-	BeforeEach(func() {
-		cmd = exec.Command(pathToU2datetCLI)
+	JustBeforeEach(func() {
+		cmd = exec.Command(pathToU2datetCLI, args...)
 		stdin, err = cmd.StdinPipe()
 		if err != nil {
 			log.Fatal(err)
@@ -204,6 +205,18 @@ var _ = Describe("U2date", func() {
 				// known bug: u2date will insert a "\n" when the timestamp is the very last
 				Ω(string(session.Wait().Out.Contents())).Should(Equal("2017-07-13 19:40:00 -0700 PDT.0 2017-07-13 19:40:00 -0700 PDT. 2017-07-13 19:40:00 -0700 PDT\n"))
 			})
+		})
+		Describe("When using the '-wrap=\"' flag", func() {
+			BeforeEach(func() {
+				args = []string{"-wrap=\""}
+			})
+			It("blindly puts double-quotes around the date", func() {
+				go writeToStdin(stdin, `1500000000000000000`)
+				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(string(session.Wait().Out.Contents())).Should(Equal("\"2017-07-13 19:40:00 -0700 PDT\"\n"))
+			})
+
 		})
 	})
 

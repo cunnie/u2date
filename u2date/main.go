@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"regexp"
@@ -11,20 +12,23 @@ import (
 )
 
 func main() {
+	wrap := ""
+	flag.StringVar(&wrap, "wrap", "", `string to wrap converted dates; for JSON compatibility, set to double-quote: -wrap=\"`)
+	flag.Parse()
 	input := bufio.NewScanner(os.Stdin)
 
 	reTimeSeconds := regexp.MustCompile(`([^\d]|^)1\d{9}\.\d+`)          // seconds since the Epoch, includes subseconds
 	reTimeNanoseconds := regexp.MustCompile(`([^\d]|^)1\d{18}([^\d]|$)`) // nanoseconds since the Epoch, no subseconds
 
 	for input.Scan() {
-		s := reTimeSeconds.ReplaceAllStringFunc(input.Text(), secondsToTime)
-		s = reTimeNanoseconds.ReplaceAllStringFunc(s, nanosecondsToTime)
+		s := reTimeSeconds.ReplaceAllStringFunc(input.Text(), func(s string) string { return secondsToTime(s, wrap) })
+		s = reTimeNanoseconds.ReplaceAllStringFunc(s, func(s string) string { return nanosecondsToTime(s, wrap) })
 		fmt.Println(s) // Println will add back the final '\n'
 	}
 	check(input.Err())
 }
 
-func secondsToTime(rawSecondsString string) string {
+func secondsToTime(rawSecondsString string, wrapper string) string {
 	// The regex might pick up an optional non-decimal leading character, "prefix"
 	prefix := ""
 	if rawSecondsString[0] != uint8('1') {
@@ -36,14 +40,14 @@ func secondsToTime(rawSecondsString string) string {
 	check(err)
 	nanoseconds, err := strconv.ParseInt((secondsAndNanoseconds[1] + "000000000")[:9], 10, 64)
 	check(err)
-	return prefix + time.Unix(seconds, nanoseconds).String()
+	return wrapper + prefix + time.Unix(seconds, nanoseconds).String() + wrapper
 }
 
 // static variable, declaring at global scope seems like the least evil
 // https://stackoverflow.com/questions/30558071/static-local-variable-in-go
 var reDigits = regexp.MustCompile(`\d`)
 
-func nanosecondsToTime(rawNanosecondsString string) string {
+func nanosecondsToTime(rawNanosecondsString string, wrapper string) string {
 	// The regex might pick up optional non-decimal leading & trailing characters, "prefix" and "suffix"
 	prefix := ""
 	suffix := ""
@@ -58,7 +62,7 @@ func nanosecondsToTime(rawNanosecondsString string) string {
 	}
 	nanoseconds, err := strconv.ParseInt(rawNanosecondsString, 10, 64)
 	check(err)
-	return prefix + time.Unix(0, nanoseconds).String() + suffix
+	return wrapper + prefix + time.Unix(0, nanoseconds).String() + suffix + wrapper
 }
 
 func check(err error) {
