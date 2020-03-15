@@ -8,7 +8,7 @@ time](https://en.wikipedia.org/wiki/Unix_time) (e.g. `1530473256.452262878`
 ### Linux Quick Start
 
 ```shell
-curl -o u2date -L https://github.com/cunnie/u2date/releases/download/1.2.0/u2date-linux-amd64
+curl -o u2date -L https://github.com/cunnie/u2date/releases/download/1.3.0/u2date-linux-amd64
 chmod +x u2date
 ./u2date < /var/vcap/sys/log/atc/atc.stdout.log | less
 ```

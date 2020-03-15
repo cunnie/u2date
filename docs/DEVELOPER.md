@@ -9,10 +9,10 @@
 
 `u2date` uses the Golang BDD testing framework, [Ginkgo](https://github.com/onsi/ginkgo):
 
-```
-go get github.com/cunnie/u2date
-cd $GOPATH/src/github.com/cunnie/u2date
-ginkgo -r .
+```sh
+# go get -u github.com/onsi/ginkgo/ginkgo  # installs the ginkgo CLI
+# go get -u github.com/onsi/gomega/...     # fetches the matcher library
+ginkgo -r u2date/
 ```
 
 ### TODO

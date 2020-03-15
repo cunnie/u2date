@@ -23,7 +23,8 @@ var _ = Describe("u2date", func() {
 	}
 
 	BeforeSuite(func() {
-		os.Setenv("TZ", "America/Los_Angeles")
+		err = os.Setenv("TZ", "America/Los_Angeles")
+		Ω(err).ShouldNot(HaveOccurred())
 		pathToU2datetCLI, err = gexec.Build("github.com/cunnie/u2date/u2date")
 		Ω(err).ShouldNot(HaveOccurred())
 	})
@@ -79,10 +80,10 @@ var _ = Describe("u2date", func() {
 		})
 		When("there are several timestamps", func() {
 			It("converts them all", func() {
-				go writeToStdin(stdin, "💜️1500000000❤️️1500000000.🧡1500000000.0💛\n")
+				go writeToStdin(stdin, "💜1500000000❤️1500000001.🧡1500000002.0💛\n")
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Ω(err).ShouldNot(HaveOccurred())
-				Ω(string(session.Wait().Out.Contents())).Should(Equal("💜2017-07-13 19:40:00 -0700 PDT❤️2017-07-13 19:40:00 -0700 PDT.🧡017-07-13 19:40:00 -0700 PDT💛\n"))
+				Ω(string(session.Wait().Out.Contents())).Should(Equal("💜2017-07-13 19:40:00 -0700 PDT❤️2017-07-13 19:40:01 -0700 PDT.🧡2017-07-13 19:40:02 -0700 PDT💛\n"))
 			})
 		})
 		When("passed a file containing a timestamp that's just shy of 2 billion", func() {
@@ -128,16 +129,6 @@ var _ = Describe("u2date", func() {
 				Ω(err).ShouldNot(HaveOccurred())
 				// known bug: u2date will insert a "\n" when the timestamp is the very last
 				Ω(string(session.Wait().Out.Contents())).Should(Equal("999999999.9\n"))
-			})
-		})
-
-		When("passed a file containing a timestamp that doesn't have a decimal point", func() {
-			It("doesn't convert it", func() {
-				go writeToStdin(stdin, "1500000000.0 1500000000. 1500000000")
-				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-				Ω(err).ShouldNot(HaveOccurred())
-				// known bug: u2date will insert a "\n" when the timestamp is the very last
-				Ω(string(session.Wait().Out.Contents())).Should(Equal("2017-07-13 19:40:00 -0700 PDT 1500000000. 1500000000\n"))
 			})
 		})
 	})
@@ -204,10 +195,10 @@ var _ = Describe("u2date", func() {
 				args = []string{"-wrap=\""}
 			})
 			It("blindly puts double-quotes around the date", func() {
-				go writeToStdin(stdin, `1500000000000000000`)
+				go writeToStdin(stdin, `1500000000000000000💜1500000000❤️1500000001.🧡1500000002.0💛`)
 				session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Ω(err).ShouldNot(HaveOccurred())
-				Ω(string(session.Wait().Out.Contents())).Should(Equal("\"2017-07-13 19:40:00 -0700 PDT\"\n"))
+				Ω(string(session.Wait().Out.Contents())).Should(Equal("\"2017-07-13 19:40:00 -0700 PDT\"💜\"2017-07-13 19:40:00 -0700 PDT\"❤️\"2017-07-13 19:40:01 -0700 PDT\".🧡\"2017-07-13 19:40:02 -0700 PDT\"💛\n"))
 			})
 		})
 	})
@@ -218,7 +209,7 @@ var _ = Describe("u2date", func() {
 })
 
 func writeToStdin(stdin io.WriteCloser, stdinString string) {
-	defer stdin.Close()
+	defer func() { _ = stdin.Close() }()
 	_, err := io.WriteString(stdin, stdinString)
 	if err != nil {
 		log.Fatal(err)
