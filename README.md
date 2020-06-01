@@ -43,7 +43,7 @@ TZ=America/Toronto ./u2date < /var/vcap/sys/log/atc/atc.stdout.log | less
 
 You may want to wrap the converted time in double-quotes (") if, for example,
 the input is valid JSON and the the timestamp is a number and not a string. This
-preserves JSON-compatibility. Use `u2date -wrap =\"` to surround the converted
+preserves JSON-compatibility. Use `u2date -wrap=\"` to surround the converted
 date with quotes.
 
 The UNIX Epoch time pattern-match is unsophisticated:
