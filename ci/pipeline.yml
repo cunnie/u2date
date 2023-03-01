@@ -18,11 +18,16 @@ jobs:
       image_resource:
         type: docker-image
         source:
-          repository: blabbertabber/golang-ginko
+          repository: cunnie/fedora-golang-bosh
       inputs:
       - name: u2date
       run:
-        path: u2date/ci/tasks/test-unit.sh
+        dir: u2date/u2date
+        path: ginkgo
+        args:
+        - -r
+        - -p
+        - .
 
 resources:
 - name: u2date
