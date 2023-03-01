@@ -1,20 +1,18 @@
 package main_test
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gexec"
 	"io"
 	"log"
-	"os"
 	"os/exec"
 	"runtime"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gexec"
 )
 
 var _ = Describe("u2date", func() {
-	var pathToU2datetCLI string
 	var stdin io.WriteCloser
-	var err error
 	var cmd *exec.Cmd
 	var args []string
 
@@ -22,15 +20,9 @@ var _ = Describe("u2date", func() {
 		panic("Tests won't work under Windows; they depend on the TZ environment variable")
 	}
 
-	BeforeSuite(func() {
-		err = os.Setenv("TZ", "America/Los_Angeles")
-		Ω(err).ShouldNot(HaveOccurred())
-		pathToU2datetCLI, err = gexec.Build("github.com/cunnie/u2date/u2date")
-		Ω(err).ShouldNot(HaveOccurred())
-	})
-
 	JustBeforeEach(func() {
 		cmd = exec.Command(pathToU2datetCLI, args...)
+		var err error
 		stdin, err = cmd.StdinPipe()
 		if err != nil {
 			log.Fatal(err)
@@ -201,10 +193,6 @@ var _ = Describe("u2date", func() {
 				Ω(string(session.Wait().Out.Contents())).Should(Equal("\"2017-07-13 19:40:00 -0700 PDT\"💜\"2017-07-13 19:40:00 -0700 PDT\"❤️\"2017-07-13 19:40:01 -0700 PDT\".🧡\"2017-07-13 19:40:02 -0700 PDT\"💛\n"))
 			})
 		})
-	})
-
-	AfterSuite(func() {
-		gexec.CleanupBuildArtifacts()
 	})
 })
 
