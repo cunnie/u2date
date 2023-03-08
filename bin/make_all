@@ -4,11 +4,13 @@
 #
 export GOOS GOARCH
 for GOOS in darwin linux freebsd; do
-  for GOARCH in amd64; do
+  for GOARCH in amd64 arm64; do
     go build -o ~/go/bin/u2date-$GOOS-$GOARCH u2date/main.go
   done
 done
 
 # Windows has a custom extension
-GOOS=windows GOARCH=amd64
-go build -o ~/go/bin/u2date-$GOOS-$GOARCH.exe u2date/main.go
+GOOS=windows
+for GOARCH in amd64 arm64; do
+  go build -o ~/go/bin/u2date-$GOOS-$GOARCH.exe u2date/main.go
+done
