@@ -1,0 +1,19 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: cunnie/fedora-golang-bosh
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run Ginkgo Tests
+      working-directory: u2date
+      run: ginkgo -r -p . 
