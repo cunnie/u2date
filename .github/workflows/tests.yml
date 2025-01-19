@@ -16,4 +16,4 @@ jobs:
 
     - name: Run Ginkgo Tests
       working-directory: u2date
-      run: ginkgo -r -p . 
+      run: ginkgo -buildvcs=false -r -p .
