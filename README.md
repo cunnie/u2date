@@ -1,4 +1,4 @@
-## u2date [![u2date](https://ci.nono.io/api/v1/pipelines/u2date/jobs/integration/badge)](https://ci.nono.io/teams/main/pipelines/u2date)
+# u2date [![CI Tests](https://github.com/cunnie/u2date/actions/workflows/ci-tests.yml/badge.svg)](https://github.com/cunnie/u2date/actions/workflows/ci-tests.yml)
 
 `u2date` is a command-line filter which converts [UNIX Epoch
 time](https://en.wikipedia.org/wiki/Unix_time) (e.g. `1530473256.452262878`
